@@ -1,10 +1,1 @@
-aws iam put-role-policy --role-name cmtr-2848fb67-iam-ar-iam_role-assume --policy-name AssumeReadOnlyRolePolicy --policy-document '{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "sts:AssumeRole",
-            "Resource": "arn:aws:iam::905418349556:role/cmtr-2848fb67-iam-ar-iam_role-readonly"
-        }
-    ]
-}'
+
