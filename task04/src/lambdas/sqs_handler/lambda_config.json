@@ -8,7 +8,12 @@
   "memory": 128,
   "timeout": 100,
   "lambda_path": "lambdas/sqs_handler",
-  "dependencies": [],
+  "dependencies": [
+    {
+      "resource_name": "async_queue",
+      "resource_type": "sqs_queue"
+  }
+  ],
   "event_sources": [
     {
       "resource_type" : "sqs_trigger",
@@ -18,7 +23,7 @@
     }  
   ],
   "env_variables": {},
-  "publish_version": true,
+  "publish_version": false,
   "url_config": {},
   "ephemeral_storage": 512,
   "logs_expiration": "${logs_expiration}"
