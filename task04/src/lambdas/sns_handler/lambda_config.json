@@ -12,8 +12,8 @@
   "event_sources": [
     {
       "resource_type": "sns_topic_trigger",
-      "target_topic": "topic_name",
-      "region": "string"|[]
+      "target_topic": "lambda_topic",
+      "region": "eu-central-1"
     }
   ],
   "env_variables": {},

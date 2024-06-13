@@ -1,24 +1,17 @@
-from commons.log_helper import get_logger
-from commons.abstract_lambda import AbstractLambda
-
-_LOG = get_logger('SnsHandler-handler')
-
-
-class SnsHandler(AbstractLambda):
-
-    def validate_request(self, event) -> dict:
-        pass
-        
-    def handle_request(self, event, context):
-        """
-        Explain incoming event here
-        """
-        # todo implement business logic
-        return 200
-    
-
-HANDLER = SnsHandler()
-
-
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 def lambda_handler(event, context):
-    return HANDLER.lambda_handler(event=event, context=context)
+    for record in event['Records']:
+        process_message(record)
+    print("done")
+
+def process_message(record):
+    try:
+        message = record['Sns']['Message']
+        print(f"Processed message {message}")
+        
+    except Exception as e:
+        print("An error occurred")
+        raise e
+
+
