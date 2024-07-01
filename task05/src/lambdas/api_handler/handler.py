@@ -14,27 +14,31 @@ def lambda_handler(event, context):
     created_at = datetime.datetime.utcnow().isoformat() + 'Z'
     
     item = {
-        'id': {'S': event_id},
-        'principalId': {'N': principal_id},
-        'createdAt': {'S': created_at},
-        'body': {'S': content}
+        'id': event_id,
+        'principalId': principal_id,
+        'createdAt': created_at,
+        'body': content
     }
 
     dynamodb = boto3.client('dynamodb')
     table_name = os.environ['table_name']
     dynamodb.put_item(
         TableName=table_name,
-        Item=item
+        Item={
+            'id': {'S': event_id},
+            'principalId': {'N': principal_id},
+            'createdAt': {'S': created_at},
+            'body': {'S': content}
+        }
     )
 
     return {
-        "statusCode": 201,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps({
             "statusCode": 201,
-            "event": item
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": json.dumps({
+                "event": item
             }, indent=4)
-    }
+        }
 

@@ -53,9 +53,9 @@
           "integration_request_body_template": {},
           "default_error_pattern": true,
           "enable_proxy": false,
-          "responses": [
+          "integration_responses": [
             {
-              "status_code": 201
+              "status_code": "201"
             }
           ]
         }
