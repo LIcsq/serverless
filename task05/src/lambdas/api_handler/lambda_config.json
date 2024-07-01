@@ -16,7 +16,7 @@
   ],
   "event_sources": [],
   "env_variables": {
-    "table_name": "${target_table_name}"
+    "table_name": "Events"
   },
   "publish_version": false,
   "url_config": {},
