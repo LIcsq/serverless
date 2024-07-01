@@ -52,12 +52,7 @@
           "method_request_parameters": {},
           "integration_request_body_template": {},
           "default_error_pattern": true,
-          "enable_proxy": false,
-          "integration_responses": [
-            {
-              "status_code": "201"
-            }
-          ]
+          "enable_proxy": false
         }
       }
     }
