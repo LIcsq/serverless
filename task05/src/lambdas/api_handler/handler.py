@@ -8,7 +8,7 @@ def lambda_handler(event, context):
 
     body = event
     principal_id = str(body['principalId'])
-    content = {k: v for k, v in body['content'].items()}
+    content = body['content']
 
     event_id = str(uuid.uuid4())
     created_at = datetime.datetime.utcnow().isoformat() + 'Z'
