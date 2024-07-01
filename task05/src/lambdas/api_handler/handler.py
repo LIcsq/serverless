@@ -28,7 +28,9 @@ def lambda_handler(event, context):
             'id': {'S': event_id},
             'principalId': {'N': principal_id},
             'createdAt': {'S': created_at},
-            'body': {'M': json.dumps(content)}
+            'body': {
+                    'M': {k: {'S': str(v)} for k, v in content.items()}
+                }
         }
     )
 
