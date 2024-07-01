@@ -8,7 +8,7 @@ def lambda_handler(event, context):
 
     body = event
     principal_id = str(body['principalId'])
-    content = str(body['content'])
+    content = {k: v for k, v in body['content'].items()}
 
     event_id = str(uuid.uuid4())
     created_at = datetime.datetime.utcnow().isoformat() + 'Z'
@@ -28,13 +28,17 @@ def lambda_handler(event, context):
             'id': {'S': event_id},
             'principalId': {'N': principal_id},
             'createdAt': {'S': created_at},
-            'body': {'S': content}
+            'body': {'M': content}
         }
     )
 
     return {
+            "statusCode": 201,
             "body": json.dumps({
                 "event": item
             }, indent=4)
         }
+
+
+string = '{"content": {"name": "John", "surname": "Doe"}}'
 
