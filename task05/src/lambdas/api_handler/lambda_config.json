@@ -16,7 +16,7 @@
   ],
   "event_sources": [],
   "env_variables": {
-    "table_name": "Events"
+    "table_name": "${resources_prefix}Events${resources_suffix}"
   },
   "publish_version": false,
   "url_config": {},
