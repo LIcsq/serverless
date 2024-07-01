@@ -2,27 +2,26 @@ import boto3
 import uuid
 import json
 import datetime
-
-table_name = 'Events'
+import os
 
 def lambda_handler(event, context):
 
     body = event
-    principal_id = body['principalId']
-    content = body['content']
+    principal_id = str(body['principalId'])
+    content = str(body['content'])
 
     event_id = str(uuid.uuid4())
     created_at = datetime.datetime.today().isoformat()
     
     item = {
-        'id': event_id,
-        'principalId': int(principal_id),
-        'createdAt': created_at,
-        'body': content
+        'id': {'S': event_id},
+        'principalId': {'N': principal_id},
+        'createdAt': {'S': created_at},
+        'body': {'S': content}
     }
 
     dynamodb = boto3.client('dynamodb')
-
+    table_name = os.environ['table_name']
     response = dynamodb.put_item(
         TableName=table_name,
         Item=item
