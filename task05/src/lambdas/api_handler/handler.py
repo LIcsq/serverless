@@ -28,17 +28,13 @@ def lambda_handler(event, context):
             'id': {'S': event_id},
             'principalId': {'N': principal_id},
             'createdAt': {'S': created_at},
-            'body': {'M': content}
+            'body': {'M': json.dumps(content)}
         }
     )
 
     return {
             "statusCode": 201,
-            "body": json.dumps({
-                "event": item
-            }, indent=4)
         }
 
 
-string = '{"content": {"name": "John", "surname": "Doe"}}'
 
