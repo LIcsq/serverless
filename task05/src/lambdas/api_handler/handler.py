@@ -33,10 +33,6 @@ def lambda_handler(event, context):
     )
 
     return {
-            "statusCode": 201,
-            "headers": {
-                "Content-Type": "application/json"
-            },
             "body": json.dumps({
                 "event": item
             }, indent=4)
