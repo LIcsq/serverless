@@ -16,7 +16,7 @@
     }
   ],
   "env_variables": {
-    "bucket_name": "${bucket_name}"
+    "bucket_name": "uuid-storage"
   },
   "publish_version": false,
   "url_config": {},
