@@ -3,6 +3,7 @@ import requests
 import boto3
 import uuid
 import os
+from decimal import Decimal
 
 # DynamoDB client
 dynamodb = boto3.client('dynamodb')
@@ -49,7 +50,7 @@ def lambda_handler(event, context):
             "longitude": {'S': str(weather_data["longitude"])},
             "timezone": {'S': weather_data["timezone"]},
             "timezone_abbreviation": {'S': ''.join(weather_data["timezone_abbreviation"])},
-            "utc_offset_seconds": {'N': 7200}
+            "utc_offset_seconds": {'S': weather_data['utc_offset_seconds']}
         }
 
     # Insert item into DynamoDB
