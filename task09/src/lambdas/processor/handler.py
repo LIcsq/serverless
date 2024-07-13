@@ -6,55 +6,46 @@ import os
 from decimal import Decimal
 
 # DynamoDB client
-dynamodb = boto3.client('dynamodb')
-table =os.environ['table_name']
 
-class OpenMeteoAPI:
-    BASE_URL = "https://api.open-meteo.com/v1/forecast"
+'''dynamodb = boto3.client('dynamodb')
+table =os.environ['table_name']'''
+dynamodb = boto3.resource('dynamodb')
+table_name = os.environ['table_name']
+table = dynamodb.Table(table_name)
 
-    @staticmethod
-    def get_weather(latitude, longitude):
-        params = {
-            'latitude': latitude,
-            'longitude': longitude,
-            'hourly': 'temperature_2m'
-        }
-        response = requests.get(OpenMeteoAPI.BASE_URL, params=params)
-        response.raise_for_status()
-        return response.json()
+BASE_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m'
 
 def lambda_handler(event, context):
     """
     Explain incoming event here
     """
-    latitude = event.get('latitude', 52.52)
-    longitude = event.get('longitude', 13.419998)
-
-    weather_data = OpenMeteoAPI.get_weather(latitude, longitude)
-    utc_offset_seconds = 0
+    response = requests.get(BASE_URL)
+    weather_data = response.json()
     
     item = {
-        "id": {'S':str(uuid.uuid4())},
-        "forecast": {'M': {
-            "elevation": {'S': str(weather_data["elevation"])},
-            "generationtime_ms": {'S': str(weather_data['generationtime_ms'])}}},
-        "hourly": {'M': {
-            "temperature_2m": {'L': [{'S': str(value) for value in weather_data['hourly']['temperature_2m']}]},
-            "time": {'L': [{'S': str(value) for value in weather_data["hourly"]["time"]}]}
-        }},
-        "hourly_units": {'M': {
-            "temperature_2m": {'S': weather_data["hourly_units"]["temperature_2m"]},
-            "time": {'S': weather_data["hourly_units"]["time"]}
-        }},
-        "latitude": {'S': str(weather_data["latitude"])},
-            "longitude": {'S': str(weather_data["longitude"])},
-            "timezone": {'S': weather_data["timezone"]},
-            "timezone_abbreviation": {'S': ''.join(weather_data["timezone_abbreviation"])},
-            "utc_offset_seconds": {'S': str(weather_data['utc_offset_seconds'])}
+        "id": str(uuid.uuid4()),
+        "forecast": {
+            "elevation": weather_data["elevation"],
+            "generationtime_ms": weather_data['generationtime_ms'],
+            "hourly": {
+                "temperature_2m": weather_data["hourly_units"]["temperature_2m"],
+                "time": weather_data["hourly_units"]["time"]
+            },
+            "hourly_units": {
+                "temperature_2m": weather_data["hourly_units"]["temperature_2m"],
+                "time": weather_data["hourly"]["time"]
+            },
+            "latitude": weather_data["latitude"],
+            "longitude": (weather_data["longitude"]),
+            "timezone": weather_data["timezone"],
+            "timezone_abbreviation": weather_data["timezone_abbreviation"],
+            "utc_offset_seconds": weather_data['utc_offset_seconds']
+            }
         }
-
+    item = json.loads(json.dumps(item), parse_float=Decimal)
+    table.put_item(Item=item)
     # Insert item into DynamoDB
-    dynamodb.put_item(TableName=table,
-                    Item=item)
+    #dynamodb.put_item(TableName=table,
+                    #Item=item)
     
     return weather_data
