@@ -30,7 +30,7 @@ def lambda_handler(event, context):
     longitude = event.get('longitude', 13.419998)
 
     weather_data = OpenMeteoAPI.get_weather(latitude, longitude)
-    utc_offset_seconds = int(weather_data["utc_offset_seconds"])
+    utc_offset_seconds = 0
     
     item = {
         "id": {'S':str(uuid.uuid4())},
