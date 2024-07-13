@@ -33,24 +33,24 @@ def lambda_handler(event, context):
     utc_offset_seconds = int(weather_data["utc_offset_seconds"])
     
     item = {
-    "id": {'S':str(uuid.uuid4())},
-    "forecast": {'M': {
-        "elevation": {'S': str(weather_data["elevation"])},
-        "generationtime_ms": {'S': str(weather_data['generationtime_ms'])}}},
-    "hourly": {'M': {
-        "temperature_2m": {'L': [{'S': str(value) for value in weather_data['hourly']['temperature_2m']}]},
-        "time": {'L': [{'S': str(value) for value in weather_data["hourly"]["time"]}]}
-    }},
-    "hourly_units": {'M': {
-        "temperature_2m": {'S': weather_data["hourly_units"]["temperature_2m"]},
-        "time": {'S': weather_data["hourly_units"]["time"]}
-    }},
-    "latitude": {'S': str(weather_data["latitude"])},
-    "longitude": {'S': str(weather_data["longitude"])},
-    "timezone": {'S': weather_data["timezone"]},
-    "timezone_abbreviation": {'S': ''.join(weather_data["timezone_abbreviation"])},
-    "utc_offset_seconds": {'N': int(utc_offset_seconds)}
-}
+        "id": {'S':str(uuid.uuid4())},
+        "forecast": {'M': {
+            "elevation": {'S': str(weather_data["elevation"])},
+            "generationtime_ms": {'S': str(weather_data['generationtime_ms'])}}},
+        "hourly": {'M': {
+            "temperature_2m": {'L': [{'S': str(value) for value in weather_data['hourly']['temperature_2m']}]},
+            "time": {'L': [{'S': str(value) for value in weather_data["hourly"]["time"]}]}
+        }},
+        "hourly_units": {'M': {
+            "temperature_2m": {'S': weather_data["hourly_units"]["temperature_2m"]},
+            "time": {'S': weather_data["hourly_units"]["time"]}
+        }},
+        "latitude": {'S': str(weather_data["latitude"])},
+            "longitude": {'S': str(weather_data["longitude"])},
+            "timezone": {'S': weather_data["timezone"]},
+            "timezone_abbreviation": {'S': ''.join(weather_data["timezone_abbreviation"])},
+            "utc_offset_seconds": {'N': int(utc_offset_seconds)}
+        }
 
     # Insert item into DynamoDB
     dynamodb.put_item(TableName=table,
