@@ -13,7 +13,7 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ['table_name']
 table = dynamodb.Table(table_name)
 
-BASE_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m'
+BASE_URL = 'https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m'
 
 def lambda_handler(event, context):
     """
@@ -48,4 +48,4 @@ def lambda_handler(event, context):
     #dynamodb.put_item(TableName=table,
                     #Item=item)
     
-    return weather_data
+    return item
