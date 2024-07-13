@@ -49,7 +49,7 @@ def lambda_handler(event, context):
             "longitude": {'S': str(weather_data["longitude"])},
             "timezone": {'S': weather_data["timezone"]},
             "timezone_abbreviation": {'S': ''.join(weather_data["timezone_abbreviation"])},
-            "utc_offset_seconds": {'N': 0}
+            "utc_offset_seconds": {'N': 7200}
         }
 
     # Insert item into DynamoDB
