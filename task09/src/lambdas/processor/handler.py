@@ -4,6 +4,12 @@ import boto3
 import uuid
 import os
 from decimal import Decimal
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+patch_all()
+
+client = boto3.client('lambda')
+client.get_account_settings()
 
 # DynamoDB client
 
@@ -43,9 +49,9 @@ def lambda_handler(event, context):
             }
         }
     item = json.loads(json.dumps(item), parse_float=Decimal)
-    table.put_item(Item=item)
+    res = table.put_item(Item=item)
     # Insert item into DynamoDB
     #dynamodb.put_item(TableName=table,
                     #Item=item)
     
-    return item
+    return res
