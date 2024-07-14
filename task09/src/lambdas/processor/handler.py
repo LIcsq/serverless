@@ -33,11 +33,11 @@ def lambda_handler(event, context):
             "generationtime_ms": weather_data['generationtime_ms'],
             "hourly": {
                 "temperature_2m": weather_data["hourly_units"]["temperature_2m"],
-                "time": weather_data["hourly_units"]["time"]
+                "time": weather_data['hourly']['time']
             },
             "hourly_units": {
                 "temperature_2m": weather_data["hourly_units"]["temperature_2m"],
-                "time": weather_data["hourly"]["time"]
+                "time": weather_data['hourly_units']['time']
             },
             "latitude": weather_data["latitude"],
             "longitude": (weather_data["longitude"]),
@@ -53,4 +53,4 @@ def lambda_handler(event, context):
     #dynamodb.put_item(TableName=table,
                     #Item=item)
     
-    return res.text
+    return res
