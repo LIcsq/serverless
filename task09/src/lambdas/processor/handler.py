@@ -4,12 +4,8 @@ import boto3
 import uuid
 import os
 from decimal import Decimal
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
-patch_all()
 
-client = boto3.client('lambda')
-client.get_account_settings()
+from commons.log_helper import get_logger
 
 # DynamoDB client
 
@@ -19,6 +15,7 @@ dynamodb = boto3.resource('dynamodb')
 table_name = os.environ['table_name']
 table = dynamodb.Table(table_name)
 
+_LOG = get_logger('Processor-handler')
 BASE_URL = 'https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m'
 
 def lambda_handler(event, context):
@@ -27,6 +24,7 @@ def lambda_handler(event, context):
     """
     response = requests.get(BASE_URL)
     weather_data = response.json()
+    _LOG.info(f'{weather_data}')
     
     item = {
         "id": str(uuid.uuid4()),
@@ -50,8 +48,9 @@ def lambda_handler(event, context):
         }
     item = json.loads(json.dumps(item), parse_float=Decimal)
     res = table.put_item(Item=item)
+    _LOG.info(f'{res}')
     # Insert item into DynamoDB
     #dynamodb.put_item(TableName=table,
                     #Item=item)
     
-    return res
+    return res.json()
