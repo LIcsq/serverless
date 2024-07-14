@@ -7,6 +7,7 @@
   "runtime": "python3.10",
   "memory": 128,
   "timeout": 100,
+  "tracing_mode": "Active",
   "lambda_path": "lambdas/processor",
   "dependencies": [
     {

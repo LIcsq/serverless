@@ -53,4 +53,4 @@ def lambda_handler(event, context):
     #dynamodb.put_item(TableName=table,
                     #Item=item)
     
-    return res.json()
+    return res.text
