@@ -171,9 +171,7 @@ def lambda_handler(event, context):
         elif path == '/reservations' and http_method == 'POST':
 
             item = json.loads(event['body'])
-            response = reservations_name.scan()
-            _LOG.info(f"{response=}")
-            reservations = response['Items']
+            _LOG.info(item)
             reservation_id = str(uuid.uuid4())
             response = reservations_name.put_item(Item={"id": reservation_id, **item})
             _LOG.info(response)
