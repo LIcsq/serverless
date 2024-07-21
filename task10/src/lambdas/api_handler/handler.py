@@ -4,6 +4,7 @@ import boto3
 import json
 import uuid
 import os
+from decimal import Decimal
 
 _LOG = get_logger('ApiHandler-handler')
 
@@ -106,46 +107,89 @@ def lambda_handler(event, context):
         
         elif path == '/tables' and http_method == 'GET':
 
-            formatted_tables = []
+            table_id = int(event['path'].split('/')[-1])
+            _LOG.info(f"{table_id=}")
+            item = tables_name.get_item(Key={'id': int(table_id)})
+            body = json.dumps(item["Item"])
+            _LOG.info(f"{body=}")
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'tables': formatted_tables})
+                'body': json.dumps(body)
             }
         
         elif path == '/tables' and http_method == 'POST':
+            body = json.loads(event['body'])
+            item = {
+                 "id": body['id'],
+                 "number": body['number'],
+                 "places": body['places'],
+                 "isVip": body['isVip'],
+                 "minOrder": body['minOrder']
+             }
 
-            formatted_tables = []
+            item = json.loads(json.dumps(item), parse_float=Decimal)
+            response = tables_name.put_item(Item=item)
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'tables': formatted_tables})
+                'body': json.dumps({"id": body['id']})
             }
         
         elif path == '/tables/{tableId}' and http_method == 'GET':
-            formatted_tables = []
+            response = tables_name.scan()
+            items = response['Items']
+            _LOG.info(items)
+            items = sorted(items, key=lambda item: item['id'])
+            tables = {'tables': sorted(items, key=lambda item: item['id'])}
+            _LOG.info(tables)
+            body = json.dumps(tables)
+            _LOG.info(body)
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'tables': formatted_tables})
+                'body': json.dumps(body)
             }
         
         elif path == '/reservations' and http_method == 'GET':
             # Format the response
-            formatted_tables = []
+            _LOG.info("reservations get")
+            response = reservations_name.scan()
+            items = response['Items']
+            _LOG.info(items)
+            for i in items:
+                del i["id"]
+            _LOG.info(items)
+            items = sorted(items, key=lambda item: item['tableNumber'])
+            _LOG.info(items)
+            reservations = {"reservations": items}
+            _LOG.info(reservations)
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'tables': formatted_tables})
+                'body': json.dumps(reservations)
             }
         
         elif path == '/reservations' and http_method == 'POST':
 
-            formatted_tables = []
+            body = json.loads(event['body'])
+            reservation_id = str(uuid.uuid4())
+            item = {
+                "reservationId": reservation_id,
+                "tableNumber": body['tableNumber'],
+                "clientName": body['clientName'],
+                "phoneNumber": body['phoneNumber'],
+                "date": body['date'],
+                "slotTimeStart": body['slotTimeStart'],
+                "slotTimeEnd": body['slotTimeEnd']
+            }
+
+            item = json.loads(json.dumps(item), parse_float=Decimal)
+            response = tables_name.put_item(Item=item)
             
             return {
                 'statusCode': 200,
-                'body': json.dumps({'tables': formatted_tables})
+                'body': json.dumps({"reservationId": reservation_id})
             }
     
     except Exception as e:
