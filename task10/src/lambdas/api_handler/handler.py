@@ -12,7 +12,7 @@ user_pool_name = os.environ['USER_POOL']
 client_app = 'client-app'
 
 user_pool_id = None
-response = client.list_user_pools(MaxResult = 60)
+response = client.list_user_pools(MaxResults = 60)
 for user_pool in response['UserPools']:
     if user_pool['Name'] == user_pool_name:
         user_pool_id = user_pool['Id']
@@ -96,7 +96,7 @@ def lambda_handler(event, context):
                 },
             ClientId=user_pool_id,
         )
-        accessToken = ['AuthenticationResult']['IdToken']
+        accessToken = response['AuthenticationResult']['IdToken']
         _LOG.info(f'accessToken: {accessToken}')
         return {
             'statusCode': 200,
