@@ -137,14 +137,11 @@ def lambda_handler(event, context):
             }
         
         elif path == '/tables/{tableId}' and http_method == 'GET':
-            response = tables_name.scan()
-            items = response['Items']
-            _LOG.info(items)
-            items = sorted(items, key=lambda item: item['id'])
-            tables = {'tables': sorted(items, key=lambda item: item['id'])}
-            _LOG.info(tables)
-            body = json.dumps(tables)
-            _LOG.info(body)
+            table_id = int(event['path'].split('/')[-1])
+            _LOG.info(f"{table_id=}")
+            item = tables_name.get_item(Key={'id': int(table_id)})
+            body = json.dumps(item["Item"])
+            _LOG.info(f"{body=}")
             
             return {
                 'statusCode': 200,
