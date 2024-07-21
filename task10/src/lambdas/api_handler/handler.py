@@ -5,6 +5,7 @@ import json
 import uuid
 import os
 from decimal import Decimal
+from datetime import datetime
 
 _LOG = get_logger('ApiHandler-handler')
 
@@ -121,7 +122,7 @@ def lambda_handler(event, context):
         elif path == '/tables' and http_method == 'POST':
             body = json.loads(event['body'])
             item = {
-                 "id": body['id'],
+                 "id": int(body['id']),
                  "number": body['number'],
                  "places": body['places'],
                  "isVip": body['isVip'],
@@ -138,10 +139,10 @@ def lambda_handler(event, context):
         
         elif path == '/tables/{tableId}' and http_method == 'GET':
             table_id = int(event['path'].split('/')[-1])
-            _LOG.info(f"{table_id=}")
+            _LOG.info(f"table id {table_id}")
             item = tables_name.get_item(Key={'id': int(table_id)})
             body = json.dumps(item["Item"])
-            _LOG.info(f"{body=}")
+            _LOG.info(f"tablesid {body}")
             
             return {
                 'statusCode': 200,
@@ -153,7 +154,7 @@ def lambda_handler(event, context):
             _LOG.info("reservations get")
             response = reservations_name.scan()
             items = response['Items']
-            _LOG.info(items)
+            _LOG.info(f'Reservation get {items}')
             for i in items:
                 del i["id"]
             _LOG.info(items)
@@ -169,20 +170,13 @@ def lambda_handler(event, context):
         
         elif path == '/reservations' and http_method == 'POST':
 
-            body = json.loads(event['body'])
+            item = json.loads(event['body'])
+            response = reservations_name.scan()
+            _LOG.info(f"{response=}")
+            reservations = response['Items']
             reservation_id = str(uuid.uuid4())
-            item = {
-                "id": reservation_id,
-                "tableNumber": body['tableNumber'],
-                "clientName": body['clientName'],
-                "phoneNumber": body['phoneNumber'],
-                "date": body['date'],
-                "slotTimeStart": body['slotTimeStart'],
-                "slotTimeEnd": body['slotTimeEnd']
-            }
-
-            item = json.loads(json.dumps(item), parse_float=Decimal)
-            response = tables_name.put_item(Item=item)
+            response = reservations_name.put_item(Item={"id": reservation_id, **item})
+            _LOG.info(response)
             
             return {
                 'statusCode': 200,
