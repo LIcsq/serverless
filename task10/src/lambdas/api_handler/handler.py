@@ -175,7 +175,7 @@ def lambda_handler(event, context):
             body = json.loads(event['body'])
             reservation_id = str(uuid.uuid4())
             item = {
-                "reservationId": reservation_id,
+                "id": reservation_id,
                 "tableNumber": body['tableNumber'],
                 "clientName": body['clientName'],
                 "phoneNumber": body['phoneNumber'],
