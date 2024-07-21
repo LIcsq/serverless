@@ -26,98 +26,132 @@ for user_pool_client in response['UserPoolClients']:
         client_app_id = user_pool_client['ClientId']
         break
 _LOG.info(f'Client app id: {client_app_id}')
-'''
-dynamodb = boto3.resource('dynamodb')
-tables_db = dynamodb.Table(os.environ['TABLES'])
-reservations_name = dynamodb.Table(os.environ['RESERVATIONS'])
-'''
 
+dynamodb = boto3.resource('dynamodb')
+tables_name = dynamodb.Table(os.environ['TABLES'])
+reservations_name = dynamodb.Table(os.environ['RESERVATIONS'])
 
 def lambda_handler(event, context):
 
     path = event['path']
     http_method = event['httpMethod']
-    body = json.loads(event['body'])
-    _LOG.info(f'{path} {http_method} {body}')
+    
+    _LOG.info(f'{path} {http_method}')
+    try:
+        if path == '/signup' and http_method == 'POST':
+            body = json.loads(event['body'])
 
-    if path == '/signup' and http_method == 'POST':
+            email = body['email']
+            first_name = body['firstName']
+            last_name = body['lastName']
+            password = body['password']
+            _LOG.info(f'{email}, {first_name}, {last_name}, {password}')
 
-        email = body['email']
-        first_name = body['firstName']
-        last_name = body['lastName']
-        password = body['password']
-        _LOG.info(f'{email}, {first_name}, {last_name}, {password}')
+            response = client.admin_create_user(
+                UserPoolId = user_pool_id,
+                Username = email,
+                UserAttributes = [
+                    {
+                        'Name': 'email',
+                        'Value': email
+                    },
+                    {
+                        'Name': 'given_name',
+                        'Value': first_name
+                    },
+                    {
+                        'Name': 'family_name',
+                        'Value': last_name
+                    }
+                ],
+                TemporaryPassword = password,
+                MessageAction = 'SUPPRESS'
+            )
+            _LOG.info(f'Create User Response: {response}')
 
-        response = client.admin_create_user(
-            UserPoolId = user_pool_id,
-            Username = email,
-            UserAttributes = [
-                {
-                    'Name': 'email',
-                    'Value': email
-                },
-                {
-                    'Name': 'given_name',
-                    'Value': first_name
-                },
-                {
-                    'Name': 'family_name',
-                    'Value': last_name
-                }
-            ],
-            TemporaryPassword = password,
-            MessageAction = 'SUPRESS'
-        )
-        _LOG.info(f'Create User Response: {response}')
+            response = client.admin_set_user_password(
+                UserPoolId = user_pool_id,
+                Username = email,
+                Password = password,
+                Permanent=True
+            )
+            _LOG.info(f'Set password Response: {response}')
 
-        response = client.admin_set_user_password(
-            UserPoolId = user_pool_id,
-            Username = email,
-            Password = password,
-            Permanent=True
-        )
-        _LOG.info(f'Set password Response: {response}')
+            return {
+                'statusCode': 200,
+                'body': json.dumps({"message": "Sign-up process is successful"})
+            }
+            
+        elif path == '/signin' and http_method == 'POST':
+            body = json.loads(event['body'])
+            email = body['email']
+            password = body['password']
+            _LOG.info(f'{email}, {password}')
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps({'Sign-up process is successful'})
-        }
+            response = client.initiate_auth(
+                AuthFlow = 'USER_PASSWORD_AUTH',
+                AuthParameters = {
+                    'USERNAME': email,
+                    'PASSWORD': password
+                    },
+                ClientId=client_app_id
+            )
+            access_token = response['AuthenticationResult']['AccessToken']
+            id_token = response['AuthenticationResult']['IdToken']
+            _LOG.info(f'accessToken: {access_token}')
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'accessToken': id_token})
+            }
         
-    elif path == '/signin' and http_method == 'POST':
-        email = body['email']
-        password = body['password']
-        _LOG.info(f'{email}, {password}')
+        elif path == '/tables' and http_method == 'GET':
 
-        response = client.initiate_auth(
-            AuthFlow = 'USER_PASSWORD_AUTH',
-            AuthParameters = {
-                'USERNAME': email,
-                'PASSWORD': password
-                },
-            ClientId=user_pool_id,
-        )
-        accessToken = response['AuthenticationResult']['IdToken']
-        _LOG.info(f'accessToken: {accessToken}')
+            formatted_tables = []
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'tables': formatted_tables})
+            }
+        
+        elif path == '/tables' and http_method == 'POST':
+
+            formatted_tables = []
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'tables': formatted_tables})
+            }
+        
+        elif path == '/tables/{tableId}' and http_method == 'GET':
+            formatted_tables = []
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'tables': formatted_tables})
+            }
+        
+        elif path == '/reservations' and http_method == 'GET':
+            # Format the response
+            formatted_tables = []
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'tables': formatted_tables})
+            }
+        
+        elif path == '/reservations' and http_method == 'POST':
+
+            formatted_tables = []
+            
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'tables': formatted_tables})
+            }
+    
+    except Exception as e:
+        _LOG.error(f'{e}')
         return {
-            'statusCode': 200,
-            'body': json.dumps({'accessToken': accessToken})
+            'statusCode': 400,
+            'body': json.dumps({'message': 'Something wrong'})
         }
-    
-    elif path == '/tables' and http_method == 'GET':
-        return "tables GET"
-    
-    elif path == '/tables' and http_method == 'POST':
-        return "tables POST"
-    
-    elif path == '/tables/{tableId}' and http_method == 'GET':
-        tableId = path.split('/')[-1]
-        return "tablesId GET"
-    
-    elif path == '/reservations' and http_method == 'GET':
-        return "Reservations GET"
-    
-    elif path == '/reservations' and http_method == 'POST':
-        return "reservations POST"
-    
-    else:
-        return 'No such path'
+
