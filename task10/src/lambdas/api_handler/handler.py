@@ -20,9 +20,20 @@ def signup_post(body):
     first_name = body['firstName']
     last_name = body['lastName']
 
+    user_pools = client.list_user_pools(MaxResults=60)
+    for user_pool in user_pools['UserPools']:
+        if user_pool['Name'] == user_pool_name:
+            user_pool_id = user_pool['Id']
+            break
+        else:
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Bad request.')
+            }
+
     # create the user
     create_user = client.admin_create_user(
-        UserPoolId = None,
+        UserPoolId = user_pool_id,
         Username = username,
         UserAttributes = [
             {
@@ -116,8 +127,8 @@ def lambda_handler(event, context):
     _LOG.info(f'{path}{http_method}{body}')
 
     if path == '/signup' and http_method == 'POST':
-        #signup_post(body)
-        return 'I am work'
+        response = signup_post(body)
+        return response
         
     elif path == '/signin' and http_method == 'POST':
         response = signin_post(body)
