@@ -33,6 +33,11 @@ dynamodb = boto3.resource('dynamodb')
 tables_name = dynamodb.Table(os.environ['TABLES'])
 reservations_name = dynamodb.Table(os.environ['RESERVATIONS'])
 
+def decimal_serializer(obj):
+    if isinstance(obj, Decimal):
+        return int(obj)
+    raise TypeError("Type not serializable")
+
 def lambda_handler(event, context):
 
     path = event['path']
@@ -106,20 +111,19 @@ def lambda_handler(event, context):
                 'body': json.dumps({'accessToken': id_token})
             }
         
-        elif path == '/tables' and http_method == 'GET':
+        elif path == '/tables' and http_method == 'GET': #work
 
-            table_id = int(event['path'].split('/')[-1])
-            _LOG.info(f"{table_id=}")
-            item = tables_name.get_item(Key={'id': int(table_id)})
-            body = json.dumps(item["Item"])
+            response = tables_name.scan()
+            _LOG.info(response)
+            body = response['Items']
             _LOG.info(f"{body=}")
             
             return {
                 'statusCode': 200,
-                'body': json.dumps(body)
+                'body': json.dumps(body, default=decimal_serializer)
             }
         
-        elif path == '/tables' and http_method == 'POST':
+        elif path == '/tables' and http_method == 'POST': # work
             body = json.loads(event['body'])
             item = {
                  "id": int(body['id']),
@@ -129,7 +133,7 @@ def lambda_handler(event, context):
                  "minOrder": body['minOrder']
              }
 
-            item = json.loads(json.dumps(item), parse_float=Decimal)
+            item = json.loads(json.dumps(item))
             response = tables_name.put_item(Item=item)
             
             return {
@@ -137,19 +141,19 @@ def lambda_handler(event, context):
                 'body': json.dumps({"id": body['id']})
             }
         
-        elif path == '/tables/{tableId}' and http_method == 'GET':
+        elif event['resource']  == '/tables/{tableId}' and http_method == 'GET': #not work
             table_id = int(event['path'].split('/')[-1])
             _LOG.info(f"table id {table_id}")
             item = tables_name.get_item(Key={'id': int(table_id)})
-            body = json.dumps(item["Item"])
+            body = item["Item"]
             _LOG.info(f"tablesid {body}")
             
             return {
                 'statusCode': 200,
-                'body': json.dumps(body)
+                'body': json.dumps(body, default=decimal_serializer)
             }
         
-        elif path == '/reservations' and http_method == 'GET':
+        elif path == '/reservations' and http_method == 'GET': 
             # Format the response
             _LOG.info("reservations get")
             response = reservations_name.scan()
@@ -165,10 +169,10 @@ def lambda_handler(event, context):
             
             return {
                 'statusCode': 200,
-                'body': json.dumps(reservations)
+                'body': json.dumps(reservations, default=decimal_serializer)
             }
         
-        elif path == '/reservations' and http_method == 'POST':
+        elif path == '/reservations' and http_method == 'POST': #not work fully
 
             item = json.loads(event['body'])
             _LOG.info(item)
