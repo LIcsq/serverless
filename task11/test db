@@ -1,0 +1,3 @@
+reservations_table: 'Reservations'
+tables_table: 'Tables'
+booking_userpool: 'simple-booking-userpool'
