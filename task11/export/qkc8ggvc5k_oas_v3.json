@@ -155,6 +155,8 @@
         }
       },
       "post": {
+        "description": "Path /tables, method POST",
+        "summary": "Path /reservations, method POST",
         "responses": {
           "200": {
             "description": "200 response",
