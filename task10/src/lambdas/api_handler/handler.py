@@ -115,12 +115,13 @@ def lambda_handler(event, context):
 
             response = tables_name.scan()
             _LOG.info(response)
-            body = response['Items']
+            items = {'tables': sorted(items, key=lambda item: item['id'])}
+            body = json.dumps(items, default=decimal_serializer)
             _LOG.info(f"{body=}")
             
             return {
                 'statusCode': 200,
-                'body': json.dumps(body, default=decimal_serializer)
+                'body': body
             }
         
         elif path == '/tables' and http_method == 'POST': # work
@@ -176,6 +177,33 @@ def lambda_handler(event, context):
 
             item = json.loads(event['body'])
             _LOG.info(item)
+            # check if table exsist
+            tables_response = tables_name.scan()
+            tables = tables_response['Items']
+            for table in tables:
+                if table["number"] == item['tableNumber']:
+                    break
+                else:
+                    raise ValueError("No such table.")
+                
+            # check slots
+            proposed_time_start = datetime.strptime(item["slotTimeStart"], "%H:%M").time()
+            proposed_time_end = datetime.strptime(item["slotTimeEnd"], "%H:%M").time()
+            reservations_response = reservations_name.scan()
+            reservations = reservations_response['Items']
+            _LOG.info(f'reservations table: {reservations}')
+
+            for reserved in reservations:
+                if reserved['tableNumber'] != item['tableNumber']:
+                    continue
+                if reserved['date'] != item['date']:
+                    continue
+
+                reserved_time_start = datetime.strptime(reserved["slotTimeStart"], "%H:%M").time()
+                reserved_time_end = datetime.strptime(reserved["slotTimeEnd"], "%H:%M").time()
+                if any([reserved_time_start <= proposed_time <= reserved_time_end for proposed_time in (proposed_time_start, proposed_time_end)]):
+                    raise ValueError('Time already reserved')
+            
             reservation_id = str(uuid.uuid4())
             response = reservations_name.put_item(Item={"id": reservation_id, **item})
             _LOG.info(response)
