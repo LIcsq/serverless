@@ -117,7 +117,7 @@ def lambda_handler(event, context):
             _LOG.info(response)
             items = response['Items']
             tables = {'tables': sorted(items, key=lambda item: item['id'])}
-            body = json.dumps(items, default=decimal_serializer)
+            body = json.dumps(tables, default=decimal_serializer)
             _LOG.info(f"{body=}")
             
             return {
@@ -174,7 +174,7 @@ def lambda_handler(event, context):
                 'body': json.dumps(reservations, default=decimal_serializer)
             }
         
-        elif path == '/reservations' and http_method == 'POST': #not work fully
+        elif path == '/reservations' and http_method == 'POST': #work fully
 
             item = json.loads(event['body'])
             _LOG.info(item)
