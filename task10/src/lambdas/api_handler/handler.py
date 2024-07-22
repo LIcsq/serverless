@@ -115,7 +115,8 @@ def lambda_handler(event, context):
 
             response = tables_name.scan()
             _LOG.info(response)
-            items = {'tables': sorted(items, key=lambda item: item['id'])}
+            items = response['Items']
+            tables = {'tables': sorted(items, key=lambda item: item['id'])}
             body = json.dumps(items, default=decimal_serializer)
             _LOG.info(f"{body=}")
             
@@ -142,7 +143,7 @@ def lambda_handler(event, context):
                 'body': json.dumps({"id": body['id']})
             }
         
-        elif event['resource']  == '/tables/{tableId}' and http_method == 'GET': #not work
+        elif event['resource']  == '/tables/{tableId}' and http_method == 'GET': #work
             table_id = int(event['path'].split('/')[-1])
             _LOG.info(f"table id {table_id}")
             item = tables_name.get_item(Key={'id': int(table_id)})
@@ -180,15 +181,15 @@ def lambda_handler(event, context):
             # check if table exsist
             tables_response = tables_name.scan()
             tables = tables_response['Items']
-            for table in tables:
-                if table["number"] == item['tableNumber']:
-                    break
-                else:
-                    raise ValueError("No such table.")
+            _LOG.info(f'reservattions post Tables {tables}')
+            table_numbers = [ table["number"] for table in tables]
+            if item['tableNumber'] not in table_numbers:
+                raise ValueError("No such table.")
                 
             # check slots
             proposed_time_start = datetime.strptime(item["slotTimeStart"], "%H:%M").time()
             proposed_time_end = datetime.strptime(item["slotTimeEnd"], "%H:%M").time()
+
             reservations_response = reservations_name.scan()
             reservations = reservations_response['Items']
             _LOG.info(f'reservations table: {reservations}')
