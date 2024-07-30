@@ -1,7 +1,0 @@
-aws iam attach-role-policy --role-name cmtr-2848fb67-dynamodb-l-lambda-getProductsList --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
-
-aws iam attach-role-policy --role-name cmtr-2848fb67-dynamodb-l-lambda-createProduct --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
------------------
-zip -r create_product.zip create_product.py                                                                              
-
-aws lambda update-function-code --function-name cmtr-2848fb67-dynamodb-l-lambda-createProduct --zip-file fileb://create_product.zip
